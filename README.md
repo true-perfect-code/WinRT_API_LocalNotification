@@ -61,26 +61,6 @@ WinRT_API_LocalNotification.Platforms.Windows.LocalNotification.Schedule(
 
 ---
 
-## 🧱 How It Works
-
-* Builds toast XML using `Windows.Data.Xml.Dom.XmlDocument`.
-* Schedules a `Windows.UI.Notifications.ScheduledToastNotification` with a future `DateTimeOffset`.
-* Uses the default `ToastNotificationManager.CreateToastNotifier()` (works when the app is packaged as MSIX).
-
-### Minimal Manifest Capability (Windows)
-
-Make sure the Windows package includes the toast capability:
-
-```xml
-<uap:Extension Category="windows.toastNotification">
-  <com:ToastNotification ToastCapable="true" />
-</uap:Extension>
-```
-
-> No activation handler is required for simple scheduled toasts. If you want to handle button clicks or activation arguments, you'll need additional manifest entries and a COM activator.
-
----
-
 ## 🧰 Troubleshooting
 
 * **No toast shows in Debug**
