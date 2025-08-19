@@ -55,7 +55,7 @@ MainPage.xaml.cs                         # Calls LocalNotification.Schedule(...)
 // Schedule a notification for 1 minute from now
 WinRT_API_LocalNotification.Platforms.Windows.LocalNotification.Schedule(
     "Reminder",
-    "Time to drink some water 💧",
+    "Time for a coffee",
     DateTime.Now.AddMinutes(1));
 ```
 
