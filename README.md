@@ -1,68 +1,116 @@
-WinRT_API_LocalNotification (MAUI Windows)
+# WinRT\_API\_LocalNotification (MAUI Windows)
 
-📢 Scheduled local Windows toast notifications for .NET MAUI Apps – without external NuGet packages such as Microsoft.Toolkit.Uwp.Notifications.
+**Scheduled local Windows toast notifications** for .NET MAUI apps using the **pure WinRT API** (`Windows.UI.Notifications`) — **no external NuGet packages** required.
 
-This sample demonstrates how to use the WinRT API (Windows.UI.Notifications) in a .NET MAUI Windows project to schedule local toast notifications (using ScheduledToastNotification).
+This sample shows how to build and schedule toast notifications (via `ScheduledToastNotification`) from a MAUI Windows app. It uses simple toast XML, works with MSIX packaging, and keeps the code minimal and easy to follow.
 
-✨ Features
+---
 
-🔔 Local toast notifications via pure WinRT API
+## ✨ Features
 
-⏰ Scheduled notifications (e.g., “in 1 minute”)
+* 🔔 Local toast notifications via **WinRT**
+* ⏰ **Scheduled notifications** (e.g., "in 1 minute")
+* 🧩 No dependency on *Microsoft.WindowsAppSDK* or *CommunityToolkit*
+* 📝 Simple UI to type a message and schedule the toast
+* 🧪 Debug-friendly when **MSIX packaging** is enabled
 
-✅ No dependency on Microsoft.WindowsAppSDK or CommunityToolkit
+---
 
-📝 Simple input form inside the app → message is scheduled as toast
+## 🛠 Requirements
 
-🚀 Works in Debug & Release mode (requires MSIX packaging)
+* Windows 10 or 11
+* Visual Studio 2022 with **.NET MAUI** workload installed
+* **MSIX packaging enabled** (required for toasts to appear in Debug)
 
-📷 Screenshots
+> **Why MSIX?** Windows associates toast permissions with an App Identity. MSIX provides that identity automatically.
 
-(Add screenshots here if available, e.g., app UI and resulting toast notification)
+---
 
-🛠️ Requirements
+## ⚡ Quick Start
 
-Windows 10 or Windows 11
+1. **Clone** the repository and open the solution in Visual Studio 2022.
+2. Target **Windows**.
+3. **Enable MSIX packaging** for the Windows head project:
 
-Visual Studio 2022 with .NET MAUI workload installed
+   * *Project* → **Properties** → **Windows** → check ✅ **Create App Packages (MSIX)**
+     *(On some VS versions this is labeled "Package using MSIX".)*
+4. **Build & Run** the app.
+5. Type a message, click **Send**, then close the app. The toast will appear at the scheduled time.
 
-Enable MSIX Packaging:
+---
 
-Right-click project → Properties → Windows →
+## 📂 Project Structure
 
-Check ✅ “Create App Packages (MSIX)”
+```
+Platforms/Windows/LocalNotification.cs   # Core logic for scheduled toasts via WinRT
+MainPage.xaml                            # UI with input field & button
+MainPage.xaml.cs                         # Calls LocalNotification.Schedule(...)
+```
 
-Toasts will not show in Debug mode without MSIX packaging
+---
 
-📂 Project Structure
-Platforms/Windows/LocalNotification.cs   // Core logic for scheduled toasts
-MainPage.xaml                            // UI with input field & button
-MainPage.xaml.cs                         // Calls LocalNotification.Schedule()
+## 🧩 Usage Example
 
-⚡ Usage Example
+```csharp
 // Schedule a notification for 1 minute from now
 WinRT_API_LocalNotification.Platforms.Windows.LocalNotification.Schedule(
     "Reminder",
     "Time to drink some water 💧",
     DateTime.Now.AddMinutes(1));
+```
 
-🚀 How to Run
+---
 
-Clone this repository
+## 🧱 How It Works
 
-Open the solution in Visual Studio 2022
+* Builds toast XML using `Windows.Data.Xml.Dom.XmlDocument`.
+* Schedules a `Windows.UI.Notifications.ScheduledToastNotification` with a future `DateTimeOffset`.
+* Uses the default `ToastNotificationManager.CreateToastNotifier()` (works when the app is packaged as MSIX).
 
-Set target to Windows
+### Minimal Manifest Capability (Windows)
 
-Make sure MSIX Packaging is enabled
+Make sure the Windows package includes the toast capability:
 
-Run the app → enter a message → click Send → close the app →
-A toast will appear at the scheduled time 🎉
+```xml
+<uap:Extension Category="windows.toastNotification">
+  <com:ToastNotification ToastCapable="true" />
+</uap:Extension>
+```
 
-📌 Notes
+> No activation handler is required for simple scheduled toasts. If you want to handle button clicks or activation arguments, you'll need additional manifest entries and a COM activator.
 
-ScheduledToastNotification requires the app to be packaged as MSIX.
+---
 
-Notifications use the AppUserModelID automatically assigned by the MSIX package.
+## 🧰 Troubleshooting
 
-No activator is required since this sample only schedules simple local toasts.
+* **No toast shows in Debug**
+  Ensure **MSIX packaging is enabled** (see *Quick Start*, step 3). Without package identity the notifier may fail silently.
+
+* **Nothing appears at the scheduled time**
+  Verify the scheduled time is **in the future** (system clock, time zones). The code checks this and throws if it isn't.
+
+* **Focus Assist / Do Not Disturb**
+  If Windows Focus Assist (Do Not Disturb) is on, toasts may be suppressed.
+
+* **Second run crash (previous experiments)**
+  Only create notifiers and schedule toasts **after** the app is launched (e.g., in `OnLaunched` or `MainPage.OnAppearing`). Avoid doing this in the app constructor.
+
+---
+
+## 🚫 Limitations (by design)
+
+* This sample focuses on **scheduled** local toasts with minimal plumbing.
+* **No click/activation handling** out of the box. Add a COM activator + manifest if you need to process user actions from the toast.
+* For **unpackaged** desktop scenarios you would need additional AppUserModelID shortcut registration; this sample favors the simpler MSIX path.
+
+---
+
+## 📜 License
+
+MIT — see `LICENSE` file if provided.
+
+---
+
+## 🙌 Why this project exists
+
+`Microsoft.Windows.AppNotifications` (Windows App SDK) does not support **scheduled** toasts. This repo demonstrates a practical, lightweight approach using **WinRT** directly from a MAUI Windows app.
